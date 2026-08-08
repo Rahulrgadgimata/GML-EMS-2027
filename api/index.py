@@ -1,25 +1,49 @@
 import sys
 import os
+import traceback
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app import app, db
+_import_error = None
+_flask_app = None
 
-# Lazy DB init — runs once per cold start, inside app context
-_db_initialized = False
+try:
+    from app import app as flask_app, db
+    _flask_app = flask_app
 
-@app.before_request
-def init_db():
-    global _db_initialized
-    if not _db_initialized:
-        try:
-            with app.app_context():
+    _db_initialized = False
+
+    @flask_app.before_request
+    def _init_db_lazy():
+        global _db_initialized
+        if not _db_initialized:
+            try:
                 db.create_all()
-            _db_initialized = True
-        except Exception as e:
-            app.logger.warning(f"db.create_all() skipped: {e}")
-            _db_initialized = True  # Don't retry on every request
+            except Exception as e:
+                flask_app.logger.warning(f"db.create_all skipped: {e}")
+            finally:
+                _db_initialized = True
 
-# Vercel WSGI entry point
-handler = app
+    handler = flask_app
+
+except Exception as e:
+    _import_error = {
+        "error": str(e),
+        "type": type(e).__name__,
+        "traceback": traceback.format_exc(),
+        "python_version": sys.version,
+        "env_keys": [k for k in os.environ if "DATABASE" in k or "SECRET" in k or "MAIL" in k],
+        "database_url_set": bool(os.environ.get("DATABASE_URL")),
+    }
+
+    from flask import Flask, jsonify
+
+    _err_app = Flask(__name__)
+
+    @_err_app.route("/", defaults={"path": ""})
+    @_err_app.route("/<path:path>")
+    def _show_error(path=""):
+        return jsonify(_import_error), 500
+
+    handler = _err_app
