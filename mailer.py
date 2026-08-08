@@ -47,7 +47,15 @@ class Mailer:
             max_workers=app.config.get("MAIL_WORKERS", 2),
             thread_name_prefix="mailer",
         )
-        self.outbox = Path(app.root_path) / "outbox"
+        # On Vercel (and other serverless), the filesystem is read-only except /tmp
+        _tmp = Path("/tmp/outbox")
+        _local = Path(app.root_path) / "outbox"
+        # Use /tmp if the local path is not writable
+        try:
+            _local.mkdir(exist_ok=True)
+            self.outbox = _local
+        except OSError:
+            self.outbox = _tmp
 
     # ------------------------------------------------------------------ state
     @property
@@ -232,7 +240,7 @@ class Mailer:
         raise last_error
 
     def _write_to_outbox(self, message, to) -> str:
-        self.outbox.mkdir(exist_ok=True)
+        self.outbox.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         safe = "".join(ch if ch.isalnum() else "_" for ch in to[0])[:40]
         path = self.outbox / f"{stamp}_{safe}.eml"
