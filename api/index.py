@@ -5,45 +5,55 @@ import traceback
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-_import_error = None
-_flask_app = None
+from flask import Flask, jsonify
 
-try:
-    from app import app as flask_app, db
-    _flask_app = flask_app
+# --- Fallback error app (shown if main app fails to import) ---
+_error_app = Flask(__name__)
+_import_error = {}
 
-    _db_initialized = False
 
-    @flask_app.before_request
-    def _init_db_lazy():
-        global _db_initialized
-        if not _db_initialized:
-            try:
-                db.create_all()
-            except Exception as e:
-                flask_app.logger.warning(f"db.create_all skipped: {e}")
-            finally:
-                _db_initialized = True
+def _try_load():
+    global _import_error
+    try:
+        from app import app as flask_app, db  # noqa: F401
 
-    handler = flask_app
+        _db_done = {"done": False}
 
-except Exception as e:
-    _import_error = {
-        "error": str(e),
-        "type": type(e).__name__,
-        "traceback": traceback.format_exc(),
-        "python_version": sys.version,
-        "env_keys": [k for k in os.environ if "DATABASE" in k or "SECRET" in k or "MAIL" in k],
-        "database_url_set": bool(os.environ.get("DATABASE_URL")),
-    }
+        @flask_app.before_request
+        def _init_db():
+            if not _db_done["done"]:
+                try:
+                    db.create_all()
+                except Exception as exc:
+                    flask_app.logger.warning("db.create_all skipped: %s", exc)
+                finally:
+                    _db_done["done"] = True
 
-    from flask import Flask, jsonify
+        return flask_app
 
-    _err_app = Flask(__name__)
+    except Exception as exc:  # noqa: BLE001
+        _import_error = {
+            "error": str(exc),
+            "type": type(exc).__name__,
+            "traceback": traceback.format_exc(),
+            "python": sys.version,
+            "database_url_set": bool(os.environ.get("DATABASE_URL")),
+        }
+        return None
 
-    @_err_app.route("/", defaults={"path": ""})
-    @_err_app.route("/<path:path>")
-    def _show_error(path=""):
+
+_loaded = _try_load()
+
+if _loaded is not None:
+    app = _loaded
+else:
+    app = _error_app
+
+    @app.route("/", defaults={"path": ""})
+    @app.route("/<path:path>")
+    def _show_import_error(path=""):
         return jsonify(_import_error), 500
 
-    handler = _err_app
+
+# Vercel requires a top-level 'app', 'application', or 'handler'
+handler = app
