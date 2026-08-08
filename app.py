@@ -19,7 +19,7 @@ from functools import wraps
 from io import BytesIO
 from urllib.parse import quote
 
-# pandas is imported lazily inside excel_response() to keep cold-start fast on Vercel
+# xlsxwriter is imported lazily inside excel_response() to keep cold start fast
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -36,6 +36,7 @@ from flask import (
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect as sa_inspect, text
+from sqlalchemy.pool import NullPool
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -66,14 +67,65 @@ def env_int(key, default):
         return default
 
 
+# True on Vercel (and comparable serverless hosts), where the deployment bundle
+# is mounted read-only, only /tmp is writable, and the instance is frozen the
+# moment a response is returned. Everything that writes to disk or relies on a
+# background thread has to behave differently there.
+SERVERLESS = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+
+# Supabase's direct connection host publishes an AAAA record and no A record.
+# Serverless platforms (Vercel included) have no IPv6 egress, so connecting
+# there fails with "Cannot assign requested address" no matter how correct the
+# credentials are. The Supavisor pooler is the IPv4 route and is what a
+# serverless app should use anyway.
+SUPABASE_DIRECT_HOST_RE = re.compile(r"@db\.([a-z0-9]+)\.supabase\.co(?::\d+)?/", re.I)
+
+
+def normalise_database_url(url):
+    """Make a database URL usable from SQLAlchemy 2 on a serverless host."""
+    if not url:
+        return url
+    # SQLAlchemy 2 dropped the legacy "postgres://" scheme that several
+    # dashboards still hand out.
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        if "sslmode=" not in url:
+            url += ("&" if "?" in url else "?") + "sslmode=require"
+        match = SUPABASE_DIRECT_HOST_RE.search(url)
+        if match and SERVERLESS:
+            app.logger.critical(
+                "DATABASE_URL points at the Supabase direct connection host "
+                "db.%s.supabase.co, which is IPv6-only. This platform has no "
+                "IPv6 egress, so every connection will fail with 'Cannot assign "
+                "requested address'. Use the Supavisor pooler instead: user "
+                "postgres.%s at aws-<n>-<region>.pooler.supabase.com:6543.",
+                match.group(1), match.group(1),
+            )
+    return url
+
+
 # --------------------------------------------------------------------------- #
 # App + configuration
 # --------------------------------------------------------------------------- #
 app = Flask(__name__)
 
+# A per-process random key would be regenerated on every cold start, silently
+# invalidating every session and CSRF token across serverless instances — so
+# logins and form posts fail at random. Random is fine for local dev only.
+_secret_key = env_str("SECRET_KEY")
+if not _secret_key:
+    if SERVERLESS:
+        app.logger.critical(
+            "SECRET_KEY is not set. Sessions and CSRF tokens will not survive "
+            "across serverless instances — admin login and every form POST will "
+            "fail intermittently. Set SECRET_KEY in the Vercel project settings."
+        )
+    _secret_key = secrets.token_urlsafe(48)
+
 app.config.update(
-    SECRET_KEY=env_str("SECRET_KEY") or secrets.token_urlsafe(48),
-    SQLALCHEMY_DATABASE_URI=env_str("DATABASE_URL", "sqlite:///league.db"),
+    SECRET_KEY=_secret_key,
+    SQLALCHEMY_DATABASE_URI=normalise_database_url(env_str("DATABASE_URL", "sqlite:///league.db")),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
     UPLOAD_FOLDER=os.path.join(app.root_path, "static", "player_photos"),
     TEAM_LOGO_FOLDER=os.path.join(app.root_path, "static", "team_logos"),
@@ -84,6 +136,28 @@ app.config.update(
     SESSION_COOKIE_SECURE=env_bool("SESSION_COOKIE_SECURE", False),
     PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
 )
+
+if SERVERLESS:
+    # Flask reads FLASK_DEBUG from the environment on its own, and .env ships
+    # with it turned on. Left alone on a public deployment that serves the
+    # interactive Werkzeug debugger — remote code execution — and makes every
+    # error a raw traceback instead of the branded error page.
+    app.config.update(
+        DEBUG=False,
+        PROPAGATE_EXCEPTIONS=False,
+        SESSION_COOKIE_SECURE=True,  # the deployment is HTTPS-only
+    )
+
+    if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgresql://"):
+        # A frozen instance cannot keep a connection warm, and handing a pooled
+        # connection to the next invocation gives a dead socket. Let the
+        # Supabase pooler do the pooling and open a fresh connection per
+        # request instead. The short timeout keeps an unreachable database from
+        # burning the whole function budget before the error surfaces.
+        app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+            "poolclass": NullPool,
+            "connect_args": {"connect_timeout": 5},
+        }
 
 # ---- Email automation -----------------------------------------------------
 app.config.update(
@@ -249,11 +323,52 @@ def ensure_schema():
                 conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{column.name}" {ddl}'))
 
 
-with app.app_context():
+def _prepare_upload_folders():
+    """Create the upload directories, tolerating a read-only deployment."""
     for folder in ("UPLOAD_FOLDER", "TEAM_LOGO_FOLDER", "OWNER_PHOTO_FOLDER"):
-        os.makedirs(app.config[folder], exist_ok=True)
-    db.create_all()
-    ensure_schema()
+        try:
+            os.makedirs(app.config[folder], exist_ok=True)
+        except OSError as exc:  # read-only bundle on Vercel — uploads degrade, see save_upload
+            app.logger.warning("Upload folder %s unavailable: %s", folder, exc)
+
+
+_schema_ready = False
+
+
+def init_database():
+    """Bring the schema up to date once per process, without ever raising.
+
+    This used to run at import time. On Vercel that made the whole module
+    un-importable whenever the database was unreachable — SQLAlchemy raised
+    while ``api/index.py`` was still executing ``from app import app``, so the
+    function crashed with FUNCTION_INVOCATION_FAILED before a single request
+    was handled and no traceback ever reached a browser. Doing it on the first
+    request instead means a database problem degrades to a normal 500 with a
+    logged traceback, and every non-database page keeps working.
+    """
+    global _schema_ready
+    if _schema_ready:
+        return
+    _schema_ready = True  # set first: a failure must not retry on every request
+    try:
+        with app.app_context():
+            db.create_all()
+            ensure_schema()
+    except Exception as exc:  # noqa: BLE001 — startup must never take the app down
+        app.logger.exception("Database initialisation failed: %s", exc)
+
+
+@app.before_request
+def _ensure_database_ready():
+    init_database()
+
+
+_prepare_upload_folders()
+
+# Outside serverless the app owns its filesystem and database, so do the work up
+# front and surface problems immediately rather than on the first page view.
+if not SERVERLESS:
+    init_database()
 
 
 # --------------------------------------------------------------------------- #
@@ -341,8 +456,16 @@ def save_upload(storage, folder_key, subdir, label):
     stem = secure_filename(label.replace(" ", "_")) or "upload"
     filename = f"{stem}_{datetime.now():%Y%m%d%H%M%S}_{uuid.uuid4().hex[:8]}.{extension}"
     destination = os.path.join(app.config[folder_key], filename)
-    os.makedirs(os.path.dirname(destination), exist_ok=True)
-    storage.save(destination)
+    try:
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
+        storage.save(destination)
+    except OSError as exc:
+        # The Vercel bundle is read-only, so there is nowhere durable to put the
+        # image. Losing a photo must never cost a student their registration —
+        # record it as "no photo" and move on. Wire up Vercel Blob or S3 to keep
+        # uploads (see README).
+        app.logger.warning("Could not store %s upload: %s", label, exc)
+        return None, None
     return f"{subdir}/{filename}", None
 
 
@@ -1069,16 +1192,25 @@ def owner_rows(owners):
 
 def excel_response(sheets, filename):
     """``sheets`` is a list of ``(sheet_name, list-of-dict-rows)``."""
-    import pandas as pd  # lazy import — keeps Vercel cold-start fast
+    import xlsxwriter  # lazy import — keeps cold start fast
+
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
-        for sheet_name, rows in sheets:
-            frame = pd.DataFrame(rows if rows else [{"Info": "No records"}])
-            frame.to_excel(writer, sheet_name=sheet_name[:31], index=False)
-            worksheet = writer.sheets[sheet_name[:31]]
-            for column_index, column in enumerate(frame.columns):
-                width = max(len(str(column)), *(len(str(v)) for v in frame[column])) if len(frame) else len(str(column))
-                worksheet.set_column(column_index, column_index, min(max(width + 2, 10), 42))
+    workbook = xlsxwriter.Workbook(output, {"in_memory": True})
+    header_style = workbook.add_format({"bold": True})
+    for sheet_name, rows in sheets:
+        rows = rows or [{"Info": "No records"}]
+        # Union of keys in first-seen order: the column layout the row builders
+        # above already imply, without needing pandas to infer it.
+        columns = list(dict.fromkeys(key for row in rows for key in row))
+        worksheet = workbook.add_worksheet(sheet_name[:31])
+        worksheet.write_row(0, 0, columns, header_style)
+        for row_index, row in enumerate(rows, start=1):
+            for column_index, column in enumerate(columns):
+                worksheet.write(row_index, column_index, row.get(column))
+        for column_index, column in enumerate(columns):
+            width = max([len(str(column))] + [len(str(row.get(column, ""))) for row in rows])
+            worksheet.set_column(column_index, column_index, min(max(width + 2, 10), 42))
+    workbook.close()
     output.seek(0)
     return send_file(
         output,

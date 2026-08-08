@@ -43,6 +43,18 @@ class Mailer:
         self.app = app
         app.extensions = getattr(app, "extensions", {})
         app.extensions["mailer"] = self
+        # Serverless hosts freeze the instance as soon as the response is
+        # returned, so a queued background send is simply never executed. There
+        # the send has to happen inline, before the response goes out.
+        self.deliver_inline = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
+        if self.deliver_inline:
+            # Inline sending happens on the request's clock. The default 2 tries
+            # at a 20s timeout is ~42s of worst case, well past the function's
+            # limit, which would turn a slow SMTP server into a 504 on a
+            # registration that actually succeeded. One short attempt instead:
+            # a dropped mail is logged, a lost registration is not recoverable.
+            app.config["MAIL_TIMEOUT"] = min(int(app.config.get("MAIL_TIMEOUT", 20)), 8)
+            app.config["MAIL_MAX_RETRIES"] = 1
         self._pool = ThreadPoolExecutor(
             max_workers=app.config.get("MAIL_WORKERS", 2),
             thread_name_prefix="mailer",
@@ -55,7 +67,7 @@ class Mailer:
             _local.mkdir(exist_ok=True)
             self.outbox = _local
         except OSError:
-            self.outbox = _tmp
+            self.outbox = _tmp  # _write_to_outbox creates it on first use
 
     # ------------------------------------------------------------------ state
     @property
@@ -122,7 +134,12 @@ class Mailer:
             reply_to=reply_to or self.app.config.get("MAIL_REPLY_TO"),
             bcc=bcc if bcc is not None else self.app.config.get("MAIL_ADMIN_BCC"),
         )
-        self._pool.submit(self._deliver, message, to, subject)
+        if self.deliver_inline:
+            # _deliver never raises, so a dead SMTP server still cannot break
+            # the registration that triggered this mail.
+            self._deliver(message, to, subject)
+        else:
+            self._pool.submit(self._deliver, message, to, subject)
         return True
 
     def send_now(self, *, to, subject, template, context=None):
