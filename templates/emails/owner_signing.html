@@ -1,0 +1,39 @@
+{% extends "emails/_layout.html" %}
+{% import "emails/_macros.html" as ui %}
+
+{% block preheader %}{{ team_name }} signed {{ player.name }} for {{ amount_display }} — {{ budget_display }} left in the purse.{% endblock %}
+{% block hero_badge %}Signing Confirmed{% endblock %}
+
+{% block content %}
+  {{ ui.headline(player.name ~ " is yours.") }}
+
+  {{ ui.paragraph(
+      "Your bid won. " ~ player.name ~ " joins " ~ team_name ~ " for the " ~ sport ~
+      " campaign. Here's the paperwork and what it did to your purse."
+  ) }}
+
+  {{ ui.amount_hero("Remaining purse", budget_display, "After paying " ~ amount_display ~ " for " ~ player.name) }}
+
+  {{ ui.ticket(
+      "Signing Sheet",
+      player.usn,
+      [
+        ("Player", player.name),
+        ("Sport", sport),
+        ("Position", player.position or "—"),
+        ("Category", category),
+        ("Experience", player.experience),
+        ("Branch", player.branch),
+        ("Contact", player.contact),
+        ("Email", player.email),
+        ("Bid paid", amount_display),
+      ]
+  ) }}
+
+  {{ ui.note(
+      "The player has been emailed the same confirmation and is expecting your call. Their contact details are above — reach out with practice timings and jersey details."
+  ) }}
+
+  {{ ui.button(brand.site_url, "Open the league portal") }}
+
+{% endblock %}

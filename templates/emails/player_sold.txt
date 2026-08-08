@@ -1,0 +1,52 @@
+{{ brand.name }} — {{ brand.university }}
+=========================================
+
+SOLD — {{ team_name|upper }} PICKED YOU.
+
+{{ player.name.split()[0] }}, the hammer just came down. {{ team_name }} bid for you
+at the {{ sport }} auction and won. You're now part of their squad for
+{{ brand.name }}.
+
+WINNING BID: {{ amount_display }}
+Paid by {{ team_name }}{% if owner_name %} — owner {{ owner_name }}{% endif %}
+
+SQUAD ASSIGNMENT — {{ player.usn }}
+-----------------------------------------
+Player     : {{ player.name }}
+Sport      : {{ sport }}
+Position   : {{ player.position or '—' }}
+Signed by  : {{ team_name }}
+Team owner : {{ owner_name }}
+Bid value  : {{ amount_display }}
+
+WHAT TO DO NOW
+-----------------------------------------
+1. Expect a call from your team — your owner and manager have your contact
+   details and will reach out with practice timings.
+2. Keep your kit ready — turn up to the first session with your own shoes
+   and water. Jerseys are handed out by the team.
+3. Play like you were bought for it. Because you were.
+
+League: {{ brand.site_url }}
+
+--------------------------------------------------------------
+                       ALL THE BEST!
+
+{{ brand.director_message }}
+
+{{ brand.director_name }}
+{{ brand.director_title }}
+{{ brand.university }}
+--------------------------------------------------------------
+
+THIS IS AN AUTO-GENERATED EMAIL.
+It was sent automatically by the {{ brand.short }} event management
+system. PLEASE DO NOT REPLY to this message - replies to this
+address are not read. For anything you need, contact the
+organising committee on {{ brand.support_phones_text }}{% if brand.support_email %}
+or at {{ brand.support_email }}{% endif %}.
+{% if brand.whatsapp_number %}
+ANY DOUBTS? WhatsApp us on {{ brand.whatsapp_number }}
+{{ brand.whatsapp_url }}{% endif %}
+
+(c) {{ year }} {{ brand.university }}. All rights reserved.

@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% import "_icons.html" as ico %}
+{% block title %}{{ brand.name }}{% endblock %}
+
+{% set live_sports = [
+('football', 'Football', 'football', 'The beautiful game — eleven a side, ninety minutes, one trophy.'),
+('kabaddi', 'Kabaddi', 'kabaddi', 'Raw strength, sharper strategy and lungs of steel.'),
+('basketball', 'Basketball', 'basketball', 'Fast breaks, deep threes and everything above the rim.'),
+('badminton', 'Badminton', 'badminton', 'The fastest racket sport on the planet. Blink and it is over.'),
+] %}
+
+{% set soon_sports = [
+('Cricket', 'cricket', 'Strategy over sessions — coming to a future season.'),
+('Volleyball', 'volleyball', 'Six on the floor, power at the net.'),
+('Throwball', 'throwball', 'Sharp reflexes, sharper teamwork.'),
+('Kho-Kho', 'khokho', 'Chase, dodge, repeat — the fastest tag on grass.'),
+] %}
+
+{% block hero %}
+<section class="hero">
+  <div class="hero__inner">
+    <div>
+      <span class="hero__badge">{{ ico.icon('trophy', 15) }} {{ brand.season }} · Registrations open</span>
+      <h1>The <em>{{ brand.university }}</em> Championship is back.</h1>
+      <p class="hero__lead">
+        Four sports. Dozens of franchises. One live auction where every registered
+        athlete goes under the hammer. Put your name in the pool — the team owners
+        are already scouting.
+      </p>
+      <div class="hero__actions">
+        <a href="#register" class="btn btn--primary">Register as a player</a>
+        <a href="{{ url_for('team_owner_registration') }}" class="btn btn--ghost">Register a team</a>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat">
+        <span class="stat__num" data-count-to="{{ stats.players }}">{{ stats.players }}</span>
+        <span class="stat__label">Athletes registered</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num" data-count-to="{{ stats.teams }}">{{ stats.teams }}</span>
+        <span class="stat__label">Franchises</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num" data-count-to="{{ stats.sports }}">{{ stats.sports }}</span>
+        <span class="stat__label">Sports live</span>
+      </div>
+      <div class="stat">
+        <span class="stat__num" data-count-to="{{ stats.sold }}">{{ stats.sold }}</span>
+        <span class="stat__label">Players signed</span>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block content %}
+<section id="register" class="panel" data-reveal>
+  <div class="section-title">
+    <span class="eyebrow">Step one</span>
+    <h2>Pick your sport. Claim your spot.</h2>
+    <p>Registration takes two minutes. You'll get an instant confirmation email with your entry ID — keep it, it's your
+      reference for auction day.</p>
+  </div>
+
+  <div class="card-grid" data-stagger>
+    {% for slug, name, icon, blurb in live_sports %}
+    <article class="sport-card" data-reveal>
+      <div class="sport-card__media" aria-hidden="true">{{ ico.icon(icon, 46) }}</div>
+      <div class="sport-card__body">
+        <h3 class="sport-card__title">{{ name }}</h3>
+        <p class="sport-card__desc">{{ blurb }}</p>
+        <a href="{{ url_for('register_player', sport=slug) }}" class="btn btn--dark">Register</a>
+      </div>
+    </article>
+    {% endfor %}
+
+    {% for name, icon, blurb in soon_sports %}
+    <article class="sport-card sport-card--soon" data-reveal>
+      <div class="sport-card__media" aria-hidden="true">{{ ico.icon(icon, 46) }}</div>
+      <div class="sport-card__body">
+        <h3 class="sport-card__title">{{ name }}</h3>
+        <p class="sport-card__desc">{{ blurb }}</p>
+        <span class="pill-soon">Coming soon</span>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel" data-reveal>
+  <div class="section-title">
+    <span class="eyebrow">Own a franchise</span>
+    <h2>Build the squad you'd want to play for.</h2>
+    <p>Team owners get a fixed auction purse and full freedom to spend it. Register your franchise, pick your sports,
+      and we'll email you a signing confirmation the moment you win a player.</p>
+  </div>
+  <div class="center">
+    <a href="{{ url_for('team_owner_registration') }}" class="btn btn--primary">Register your team</a>
+  </div>
+</section>
+
+<section class="panel" id="committee" data-reveal>
+  <div class="section-title">
+    <span class="eyebrow">Patron</span>
+    <h2>Under whose vision we play</h2>
+  </div>
+  <div class="people-grid" data-stagger>
+    <div class="person" data-reveal>
+      <div class="person__photo"><img src="{{ url_for('static', filename='photos/CHANCELLOR.jpg') }}"
+          alt="G.M. Lingaraju"></div>
+      <div class="person__name">G.M. Lingaraju</div>
+      <div class="person__role">Chancellor</div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" data-reveal>
+  <div class="section-title">
+    <span class="eyebrow">Guidance</span>
+    <h2>Advisory Committee</h2>
+  </div>
+  <div class="people-grid" data-stagger>
+    {% for photo, name, role in [
+    ('photos/dr_sr_shankapal.jpg', 'Dr. S.R. Shankapal', 'Vice Chancellor'),
+    ('photos/dr_hd_maheshappa.jpg', 'Dr. H.D. Maheshappa', 'Pro-Vice Chancellor'),
+    ('photos/dr_sunil_kumar_bs.jpg','Dr. Sunil Kumar B.S', 'Registrar'),
+    ('photos/dr_kiran_kumar_hs.png','Dr. Kiran Kumar H S', 'Director — SA'),
+    ('photos/ajjaha_sir.png', 'Ajjaiah G B ', 'Director — PE'),
+    ] %}
+    <div class="person" data-reveal>
+      <div class="person__photo"><img src="{{ url_for('static', filename=photo) }}" alt="{{ name }}"></div>
+      <div class="person__name">{{ name }}</div>
+      <div class="person__role">{{ role }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel" data-reveal>
+  <div class="section-title">
+    <span class="eyebrow">The people running it</span>
+    <h2>Organising Team</h2>
+  </div>
+  <div class="people-grid" data-stagger>
+    {% for photo, name, role in [
+    ('photos/rahul.jpg', 'Rahul R Gadgimata', 'General Secretary'),
+    ('photos/abhiram_naik.jpg', 'Abhiram Girish Naik', 'Technical Secretary'),
+    ('photos/Guru.jpeg', 'Gurushankar AS', 'Sports Secretary'),
+    ('photos/kumar.jpg', 'Kumar M', 'Sports Secretary'),
+
+    ] %}
+    <div class="person" data-reveal>
+      <div class="person__photo"><img src="{{ url_for('static', filename=photo) }}" alt="{{ name }}"></div>
+      <div class="person__name">{{ name }}</div>
+      <div class="person__role">{{ role }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

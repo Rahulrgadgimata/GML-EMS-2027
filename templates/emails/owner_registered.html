@@ -1,0 +1,44 @@
+{% extends "emails/_layout.html" %}
+{% import "emails/_macros.html" as ui %}
+
+{% block preheader %}{{ owner.team_name }} is registered for {{ brand.name }} — franchise ID {{ reg_code }}.{% endblock %}
+{% block hero_badge %}Franchise Registered{% endblock %}
+
+{% block content %}
+  {{ ui.headline(owner.team_name ~ " is on the board.") }}
+
+  {{ ui.paragraph(
+      "Congratulations, " ~ owner.name.split()[0] ~ " — your franchise is confirmed for " ~ brand.name ~
+      ". Your squad, your budget, your call. Here's everything we have on record."
+  ) }}
+
+  {{ ui.ticket(
+      "Franchise Card",
+      reg_code,
+      [
+        ("Team", owner.team_name),
+        ("Owner", owner.name),
+        ("USN", owner.usn),
+        ("Designation", owner.designation),
+        ("Competing in", owner.sports.replace(",", ", ") if owner.sports else "—"),
+        ("Auction purse", "₹ {:,}".format(owner.budget) if owner.budget else "—"),
+        ("Email", owner.email),
+        ("Contact", owner.contact),
+        ("Team manager", owner.manager_name),
+        ("Manager contact", owner.manager_contact_number),
+      ]
+  ) }}
+
+  {{ ui.steps("Before the auction", [
+      ("Study the player pool", "Registrations stay open until the cut-off — scout the list and shortlist your targets early."),
+      ("Plan your purse", "You bid against a fixed budget. Every rupee you spend on a marquee player is one you can't spend later."),
+      ("Be there on auction day", "Bids are placed live by the organising desk. Your manager can stand in if you can't attend."),
+  ]) }}
+
+  {{ ui.button(brand.site_url, "Open the league portal") }}
+
+  {{ ui.note(
+      "Every time you win a player, this address gets an instant signing confirmation with the bid value and your remaining purse — so your budget is never a guess."
+  ) }}
+
+{% endblock %}

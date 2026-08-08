@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}{{ sport }} registration · {{ brand.short }}{% endblock %}
+{% block container_class %}container container--narrow{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="section-title">
+    <span class="eyebrow">{{ brand.name }} · Player entry</span>
+    <h2>Register for {{ sport }}</h2>
+    <p>Fill this once. Your profile goes straight into the auction pool and a confirmation lands in your inbox with your entry ID.</p>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="name">Full name <span class="req">*</span></label>
+        <input type="text" id="name" name="name" required autocomplete="name"
+               value="{{ form.name or '' }}" placeholder="As printed on your college ID">
+      </div>
+
+      <div class="field">
+        <label for="usn">USN <span class="req">*</span></label>
+        <input type="text" id="usn" name="usn" required maxlength="20" class="input-upper"
+               value="{{ form.usn or '' }}" placeholder="e.g. 1GM22CS001">
+        <span class="hint">One registration per USN, per sport.</span>
+      </div>
+
+      <div class="field">
+        <label for="email">Email address <span class="req">*</span></label>
+        <input type="email" id="email" name="email" required autocomplete="email"
+               value="{{ form.email or '' }}" placeholder="you@example.com">
+        <span class="hint">Your confirmation and auction result are sent here.</span>
+      </div>
+
+      <div class="field">
+        <label for="contact">Mobile number <span class="req">*</span></label>
+        <input type="tel" id="contact" name="contact" required inputmode="numeric"
+               autocomplete="tel" value="{{ form.contact or '' }}" placeholder="10-digit number">
+      </div>
+
+      <div class="field">
+        <label for="branch">Branch <span class="req">*</span></label>
+        <input type="text" id="branch" name="branch" required
+               value="{{ form.branch or '' }}" placeholder="e.g. Computer Science">
+      </div>
+
+      <div class="field">
+        <label for="college_name">College <span class="req">*</span></label>
+        <input type="text" id="college_name" name="college_name" required
+               value="{{ form.college_name or '' }}" placeholder="Your college name">
+      </div>
+
+      <div class="field">
+        <label for="position">Position <span class="req">*</span></label>
+        <select id="position" name="position" required>
+          <option value="">Select your position</option>
+          {% for pos in positions %}
+            <option value="{{ pos }}" {{ 'selected' if form.position == pos }}>{{ pos }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="gender">Category <span class="req">*</span></label>
+        <select id="gender" name="gender" required>
+          {% if sport == 'Football' %}
+            <option value="Male" selected>Men</option>
+          {% else %}
+            <option value="">Select category</option>
+            <option value="Male" {{ 'selected' if form.gender == 'Male' }}>Men</option>
+            <option value="Female" {{ 'selected' if form.gender == 'Female' }}>Women</option>
+          {% endif %}
+        </select>
+        {% if sport == 'Football' %}<span class="hint">Football runs as a men's event this season.</span>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="experience">Experience <span class="req">*</span></label>
+        <select id="experience" name="experience" required>
+          <option value="">Select level</option>
+          {% for level in ['Beginner', 'Intermediate', 'Pro'] %}
+            <option value="{{ level }}" {{ 'selected' if form.experience == level }}>{{ level }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="photo">Photo</label>
+        <input type="file" id="photo" name="photo" accept="image/png,image/jpeg,image/gif,image/webp">
+        <span class="hint">Optional, but owners bid on faces they recognise. Max 8 MB.</span>
+      </div>
+
+      <div class="field field--wide">
+        <label for="achievements">Achievements</label>
+        <textarea id="achievements" name="achievements" rows="4"
+                  placeholder="Tournaments played, medals, district/state selection…">{{ form.achievements or '' }}</textarea>
+        <span class="hint">This is what team owners read before they bid. Make it count.</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <label class="terms">
+        <input type="checkbox" name="terms" required>
+        <span>I confirm these details are accurate and accept the
+          <a href="{{ url_for('terms') }}" target="_blank" rel="noopener">terms and conditions</a>.</span>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary">Complete registration</button>
+      <a href="{{ url_for('index') }}" class="back-link">← Back to all sports</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

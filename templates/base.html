@@ -1,0 +1,106 @@
+{% import "_icons.html" as ico %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ brand.name }}{% endblock %} · {{ brand.university }}</title>
+  <meta name="description" content="{% block description %}{{ brand.name }} — the inter-collegiate sports league of {{ brand.university }}. Register as a player or team owner.{% endblock %}">
+  <meta name="theme-color" content="#4a1717">
+  <link rel="icon" href="{{ url_for('static', filename='logos/gmulogo1.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/league.css') }}">
+  <script src="{{ url_for('static', filename='js/league.js') }}" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="{{ url_for('index') }}" aria-label="{{ brand.name }} home">
+        <span class="brand__crest" aria-hidden="true">
+          <svg viewBox="0 0 32 32" width="26" height="26" fill="none" stroke="currentColor"
+               stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 4h12v7a6 6 0 0 1-12 0V4Z"/>
+            <path d="M10 6H6.5v2a4.5 4.5 0 0 0 4 4.4"/>
+            <path d="M22 6h3.5v2a4.5 4.5 0 0 1-4 4.4"/>
+            <path d="M16 17v5"/>
+            <path d="M11.5 27h9l-1-4h-7l-1 4Z"/>
+          </svg>
+        </span>
+        <span class="brand__text">
+          <span class="brand__name">
+            <span class="brand__name-a">{{ brand.wordmark.split(' ')[0] }}</span>
+            <span class="brand__name-b">{{ brand.wordmark.split(' ')[1:]|join(' ') }}</span>
+          </span>
+          <span class="brand__meta">
+            <span class="brand__season">{{ brand.season }}</span>
+            <span class="brand__uni">{{ brand.university }}</span>
+          </span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="{{ url_for('index') }}#register">Players</a>
+        <a href="{{ url_for('index') }}#committee">Committee</a>
+        <a href="{{ url_for('terms') }}">Rules</a>
+        <a href="{{ url_for('team_owner_registration') }}" class="is-cta">Own a team</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% block hero %}{% endblock %}
+
+    <div class="{% block container_class %}container{% endblock %}">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes" role="status" aria-live="polite">
+            {% for category, message in messages %}
+              <div class="flash flash--{{ 'success' if category == 'success' else ('info' if category == 'info' else 'error') }}">
+                {{ ico.icon('check' if category == 'success' else ('info' if category == 'info' else 'alert'), 19) }}
+                <span>{{ message }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="site-footer" id="contact">
+    <div class="site-footer__inner">
+      <div class="site-footer__logo">
+        <span class="brand__name-a">{{ brand.wordmark.split(' ')[0] }}</span><span class="brand__name-b"> {{ brand.wordmark.split(' ')[1:]|join(' ') }}</span>
+        <span class="site-footer__season">{{ brand.season }}</span>
+      </div>
+      <p class="site-footer__tag">{{ brand.tagline }}</p>
+      <div class="site-footer__links">
+        <a href="{{ url_for('index') }}#register">Player registration</a>
+        <a href="{{ url_for('team_owner_registration') }}">Team owner registration</a>
+        <a href="{{ url_for('terms') }}">Terms &amp; rules</a>
+        {% for phone in brand.support_phones %}
+          <a class="icon-text" href="tel:+91{{ phone }}">{{ ico.icon('phone', 16) }}{{ phone }}</a>
+        {% endfor %}
+        {% if brand.support_email %}
+          <a class="icon-text" href="mailto:{{ brand.support_email }}">{{ ico.icon('mail', 16) }}{{ brand.support_email }}</a>
+        {% endif %}
+        {% if brand.whatsapp_url %}
+          <a class="icon-text" href="{{ brand.whatsapp_url }}" target="_blank" rel="noopener">{{ ico.icon('whatsapp', 16) }}WhatsApp {{ brand.whatsapp_number }}</a>
+        {% endif %}
+        <a href="{{ url_for('admin_login') }}">Admin</a>
+      </div>
+      <div class="site-footer__bottom">
+        &copy; {{ now_year }} {{ brand.university }}. All rights reserved. · {{ brand.tagline }}
+      </div>
+    </div>
+  </footer>
+  {% if brand.whatsapp_url %}
+    <a class="wa-fab" href="{{ brand.whatsapp_url }}" target="_blank" rel="noopener"
+       aria-label="Any doubts? Message us on WhatsApp">
+      {{ ico.icon('whatsapp', 25) }}
+      <span class="wa-fab__label">Any doubts? <strong>WhatsApp us</strong></span>
+    </a>
+  {% endif %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

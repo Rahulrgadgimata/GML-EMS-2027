@@ -1,0 +1,58 @@
+{{ brand.name }} — {{ brand.university }}
+=========================================
+
+YOU'RE IN, {{ player.name.split()[0].upper() }}.
+
+Your name is officially on the {{ sport }} sheet for {{ brand.name }}.
+From here every team owner in the league can see your profile — and when
+the auction opens, they'll be bidding on it.
+
+PLAYER ENTRY PASS — {{ reg_code }}
+-----------------------------------------
+Name        : {{ player.name }}
+USN         : {{ player.usn }}
+Sport       : {{ sport }}
+Position    : {{ player.position or '—' }}
+Branch      : {{ player.branch }}
+College     : {{ player.college_name }}
+Category    : {{ category }}
+Experience  : {{ player.experience }}
+Email       : {{ player.email }}
+Contact     : {{ player.contact }}
+
+WHAT HAPPENS NEXT
+-----------------------------------------
+1. Your profile goes to the auction pool — owners review every registered
+   player before bidding day.
+2. Auction day — teams bid live. The moment you're picked up we email you
+   your team, your owner and your bid value.
+3. Report to your team — your owner takes it from there: practice slots,
+   jersey and match schedule.
+
+League: {{ brand.site_url }}
+
+Spotted a mistake? This mailbox is unmonitored — reach the organising
+committee on {{ brand.support_phones_text }} with your USN
+{{ player.usn }} and we'll fix it before the auction.
+
+--------------------------------------------------------------
+                       ALL THE BEST!
+
+{{ brand.director_message }}
+
+{{ brand.director_name }}
+{{ brand.director_title }}
+{{ brand.university }}
+--------------------------------------------------------------
+
+THIS IS AN AUTO-GENERATED EMAIL.
+It was sent automatically by the {{ brand.short }} event management
+system. PLEASE DO NOT REPLY to this message - replies to this
+address are not read. For anything you need, contact the
+organising committee on {{ brand.support_phones_text }}{% if brand.support_email %}
+or at {{ brand.support_email }}{% endif %}.
+{% if brand.whatsapp_number %}
+ANY DOUBTS? WhatsApp us on {{ brand.whatsapp_number }}
+{{ brand.whatsapp_url }}{% endif %}
+
+(c) {{ year }} {{ brand.university }}. All rights reserved.

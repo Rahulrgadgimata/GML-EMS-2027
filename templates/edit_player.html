@@ -1,0 +1,155 @@
+{% extends "admin_base.html" %}
+{% import "_icons.html" as ico %}
+{% block title %}Edit {{ player.name }}{% endblock %}
+
+{% block body %}
+<div class="content" style="margin-left:0; max-width:900px; margin-right:auto;">
+  <div class="topbar">
+    <div>
+      <h1>Edit player</h1>
+      <p>{{ player.reg_code }} · {{ player.name }}</p>
+    </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn--ghost">{{ ico.icon('arrow-left', 16) }} Back to dashboard</a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ 'success' if category == 'success' else 'error' }}">
+            {{ ico.icon('check' if category == 'success' else 'alert', 18) }}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="card">
+    <div class="card__head">
+      <div class="card__title">Player details</div>
+      {% if player.sold %}
+        <span class="badge badge--sold">Sold to {{ player.sold_to }} for ₹{{ '{:,}'.format(player.bid_amount or 0) }}</span>
+      {% else %}
+        <span class="badge badge--open">In the auction pool</span>
+      {% endif %}
+    </div>
+
+    <div class="card__body">
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" value="{{ player.name }}" required>
+          </div>
+
+          <div class="field">
+            <label for="usn">USN</label>
+            <input type="text" id="usn" name="usn" value="{{ player.usn or '' }}" class="input-upper">
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ player.email or '' }}">
+            <span class="hint">Confirmations and auction results go here.</span>
+          </div>
+
+          <div class="field">
+            <label for="contact">Contact</label>
+            <input type="tel" id="contact" name="contact" value="{{ player.contact or '' }}">
+          </div>
+
+          <div class="field">
+            <label for="sport">Sport</label>
+            <select id="sport" name="sport" required data-sport-select>
+              {% for option in sports %}
+                <option value="{{ option }}" {{ 'selected' if player.sport == option }}>{{ option }}</option>
+              {% endfor %}
+            </select>
+            <span class="hint">Changing the sport resets the position list.</span>
+          </div>
+
+          <div class="field">
+            <label for="position">Position</label>
+            <select id="position" name="position" data-position-select>
+              {% for pos in positions %}
+                <option value="{{ pos }}" {{ 'selected' if player.position == pos }}>{{ pos }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="gender">Category</label>
+            <select id="gender" name="gender" required>
+              <option value="Male" {{ 'selected' if player.gender == 'Male' }}>Men</option>
+              <option value="Female" {{ 'selected' if player.gender == 'Female' }}>Women</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="experience">Experience</label>
+            <select id="experience" name="experience" required>
+              {% for level in ['Beginner', 'Intermediate', 'Pro'] %}
+                <option value="{{ level }}" {{ 'selected' if player.experience == level }}>{{ level }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="branch">Branch</label>
+            <input type="text" id="branch" name="branch" value="{{ player.branch or '' }}">
+          </div>
+
+          <div class="field">
+            <label for="college_name">College</label>
+            <input type="text" id="college_name" name="college_name" value="{{ player.college_name or '' }}">
+          </div>
+
+          <div class="field field--wide">
+            <label for="achievements">Achievements</label>
+            <textarea id="achievements" name="achievements">{{ player.achievements or '' }}</textarea>
+          </div>
+
+          <div class="field field--wide">
+            <label for="photo">Replace photo</label>
+            <input type="file" id="photo" name="photo" accept="image/png,image/jpeg,image/gif,image/webp">
+            {% if player.photo %}
+              <img src="{{ url_for('static', filename=player.photo) }}" alt="{{ player.name }}"
+                   style="margin-top:0.7rem; max-height:170px; border-radius:12px; border:2px solid var(--gold);">
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--gold">Save changes</button>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn--ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Keep the position dropdown in sync when the sport is changed.
+  const POSITIONS = {{ all_positions|tojson }};
+  const sportSelect = document.querySelector('[data-sport-select]');
+  const positionSelect = document.querySelector('[data-position-select]');
+  const currentPosition = {{ (player.position or '')|tojson }};
+
+  function syncPositions() {
+    const options = POSITIONS[sportSelect.value] || [];
+    positionSelect.innerHTML = '';
+    options.forEach(pos => {
+      const option = document.createElement('option');
+      option.value = pos;
+      option.textContent = pos;
+      option.selected = pos === currentPosition;
+      positionSelect.appendChild(option);
+    });
+  }
+
+  sportSelect.addEventListener('change', syncPositions);
+</script>
+{% endblock %}

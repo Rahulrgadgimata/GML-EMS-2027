@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · {{ brand.short }}{% endblock %}
+{% block container_class %}container container--narrow{% endblock %}
+
+{% block content %}
+<section class="panel center">
+  <div style="font-size:4rem; font-weight:900; color:var(--gold); line-height:1;">{{ code }}</div>
+  <div class="section-title" style="margin-top:0.4rem;">
+    <h2>{{ title }}</h2>
+    <p>{{ message }}</p>
+  </div>
+  <div class="form-actions" style="justify-content:center; border-top:none;">
+    <a href="{{ url_for('index') }}" class="btn btn--primary">Back to the league</a>
+  </div>
+</section>
+{% endblock %}

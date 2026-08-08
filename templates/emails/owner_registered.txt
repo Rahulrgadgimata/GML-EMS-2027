@@ -1,0 +1,56 @@
+{{ brand.name }} — {{ brand.university }}
+=========================================
+
+{{ owner.team_name|upper }} IS ON THE BOARD.
+
+Congratulations, {{ owner.name.split()[0] }} — your franchise is confirmed for
+{{ brand.name }}. Your squad, your budget, your call.
+
+FRANCHISE CARD — {{ reg_code }}
+-----------------------------------------
+Team            : {{ owner.team_name }}
+Owner           : {{ owner.name }}
+USN             : {{ owner.usn }}
+Designation     : {{ owner.designation }}
+Competing in    : {{ owner.sports.replace(',', ', ') if owner.sports else '—' }}
+Auction purse   : {{ "Rs {:,}".format(owner.budget) if owner.budget else '—' }}
+Email           : {{ owner.email }}
+Contact         : {{ owner.contact }}
+Team manager    : {{ owner.manager_name }}
+Manager contact : {{ owner.manager_contact_number }}
+
+BEFORE THE AUCTION
+-----------------------------------------
+1. Study the player pool — registrations stay open until the cut-off, so
+   scout the list and shortlist your targets early.
+2. Plan your purse — you bid against a fixed budget. Every rupee spent on a
+   marquee player is one you can't spend later.
+3. Be there on auction day — bids are placed live by the organising desk.
+   Your manager can stand in if you can't attend.
+
+League portal: {{ brand.site_url }}
+
+Every time you win a player this address gets an instant signing
+confirmation with the bid value and your remaining purse.
+
+--------------------------------------------------------------
+                       ALL THE BEST!
+
+{{ brand.director_message }}
+
+{{ brand.director_name }}
+{{ brand.director_title }}
+{{ brand.university }}
+--------------------------------------------------------------
+
+THIS IS AN AUTO-GENERATED EMAIL.
+It was sent automatically by the {{ brand.short }} event management
+system. PLEASE DO NOT REPLY to this message - replies to this
+address are not read. For anything you need, contact the
+organising committee on {{ brand.support_phones_text }}{% if brand.support_email %}
+or at {{ brand.support_email }}{% endif %}.
+{% if brand.whatsapp_number %}
+ANY DOUBTS? WhatsApp us on {{ brand.whatsapp_number }}
+{{ brand.whatsapp_url }}{% endif %}
+
+(c) {{ year }} {{ brand.university }}. All rights reserved.

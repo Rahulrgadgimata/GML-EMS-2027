@@ -1,0 +1,48 @@
+{{ brand.name }} — {{ brand.university }}
+=========================================
+
+{{ player.name|upper }} IS YOURS.
+
+Your bid won. {{ player.name }} joins {{ team_name }} for the {{ sport }} campaign.
+
+REMAINING PURSE: {{ budget_display }}
+(After paying {{ amount_display }} for {{ player.name }})
+
+SIGNING SHEET — {{ player.usn }}
+-----------------------------------------
+Player     : {{ player.name }}
+Sport      : {{ sport }}
+Position   : {{ player.position or '—' }}
+Category   : {{ category }}
+Experience : {{ player.experience }}
+Branch     : {{ player.branch }}
+Contact    : {{ player.contact }}
+Email      : {{ player.email }}
+Bid paid   : {{ amount_display }}
+
+The player has been emailed the same confirmation and is expecting your
+call. Reach out with practice timings and jersey details.
+
+League portal: {{ brand.site_url }}
+
+--------------------------------------------------------------
+                       ALL THE BEST!
+
+{{ brand.director_message }}
+
+{{ brand.director_name }}
+{{ brand.director_title }}
+{{ brand.university }}
+--------------------------------------------------------------
+
+THIS IS AN AUTO-GENERATED EMAIL.
+It was sent automatically by the {{ brand.short }} event management
+system. PLEASE DO NOT REPLY to this message - replies to this
+address are not read. For anything you need, contact the
+organising committee on {{ brand.support_phones_text }}{% if brand.support_email %}
+or at {{ brand.support_email }}{% endif %}.
+{% if brand.whatsapp_number %}
+ANY DOUBTS? WhatsApp us on {{ brand.whatsapp_number }}
+{{ brand.whatsapp_url }}{% endif %}
+
+(c) {{ year }} {{ brand.university }}. All rights reserved.

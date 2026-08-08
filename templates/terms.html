@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% import "_icons.html" as ico %}
+{% block title %}Terms &amp; rules · {{ brand.short }}{% endblock %}
+{% block container_class %}container container--narrow{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="section-title">
+    <span class="eyebrow">{{ brand.name }}</span>
+    <h2>Terms &amp; Conditions</h2>
+    <p>By registering as a player or a team owner you agree to the following.</p>
+  </div>
+
+  <ol style="padding-left:1.3rem; display:grid; gap:0.9rem; color:var(--muted); font-size:0.98rem;">
+    <li><strong style="color:var(--ink);">Accurate information.</strong> Every detail you submit — name, USN, email, contact and achievements — must be true. False entries are removed from the auction pool without notice.</li>
+    <li><strong style="color:var(--ink);">One entry per USN, per sport.</strong> You may register for more than one sport, but not twice for the same one.</li>
+    <li><strong style="color:var(--ink);">Eligibility.</strong> Players must be currently enrolled students of the participating colleges and must carry a valid college ID on match day.</li>
+    <li><strong style="color:var(--ink);">Auction purse.</strong> Team owners bid against a fixed budget. A bid above the remaining purse is rejected by the system, and all sales are final unless reset by the League Admin.</li>
+    <li><strong style="color:var(--ink);">Admin authority.</strong> The League Admin may reset a bid, correct player details or reallocate a player where an error or dispute is proven.</li>
+    <li><strong style="color:var(--ink);">Conduct.</strong> Misuse of the platform, collusion during the auction, abusive behaviour or any breach of the rules leads to disqualification of the player or the franchise.</li>
+    <li><strong style="color:var(--ink);">Photos.</strong> Uploaded images must be of the registered player or team and appropriate for public display. Anything else is deleted.</li>
+    <li><strong style="color:var(--ink);">Communication.</strong> Registration confirmations and auction results are emailed to the address you provide. Keeping it correct and monitored is your responsibility.</li>
+    <li><strong style="color:var(--ink);">Data use.</strong> Your details are used solely to run {{ brand.name }} — team allocation, scheduling and league communication — and are not shared outside the organising committee.</li>
+  </ol>
+
+  <div class="receipt" style="margin-top:2rem;">
+    <strong style="color:var(--maroon);">Need help or a correction?</strong>
+    <p class="muted" style="font-size:0.94rem; margin-top:0.35rem;">
+      Contact the League Admin
+      on {% for phone in brand.support_phones %}<a class="icon-text" href="tel:+91{{ phone }}">{{ ico.icon('phone', 15) }}{{ phone }}</a>{% if not loop.last %} or {% endif %}{% endfor %}{% if brand.support_email %},
+      by email at <a href="mailto:{{ brand.support_email }}">{{ brand.support_email }}</a>{% endif %}{% if brand.whatsapp_url %},
+      or on <a class="icon-text" href="{{ brand.whatsapp_url }}" target="_blank" rel="noopener">{{ ico.icon('whatsapp', 15) }}WhatsApp {{ brand.whatsapp_number }}</a>{% endif %}
+      &mdash; quote your entry ID.
+    </p>
+  </div>
+
+  <div class="form-actions">
+    <a href="{{ url_for('index') }}" class="btn btn--primary">Back to the league</a>
+  </div>
+</section>
+{% endblock %}

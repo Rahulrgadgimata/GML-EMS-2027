@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Team owner registration · {{ brand.short }}{% endblock %}
+{% block container_class %}container container--narrow{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="section-title">
+    <span class="eyebrow">{{ brand.name }} · Franchise entry</span>
+    <h2>Register your team</h2>
+    <p>Name your franchise, pick your sports, and you'll walk into the auction with a full purse and a live budget tracker in your inbox.</p>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="team_name">Team name <span class="req">*</span></label>
+        <input type="text" id="team_name" name="team_name" required
+               value="{{ form.team_name or '' }}" placeholder="e.g. Hustlers XI">
+        <span class="hint">Must be unique across the league.</span>
+      </div>
+
+      <div class="field">
+        <label for="name">Owner's full name <span class="req">*</span></label>
+        <input type="text" id="name" name="name" required autocomplete="name"
+               value="{{ form.name or '' }}">
+      </div>
+
+      <div class="field">
+        <label for="usn">USN <span class="req">*</span></label>
+        <input type="text" id="usn" name="usn" required maxlength="20" class="input-upper"
+               value="{{ form.usn or '' }}" placeholder="e.g. 1GM22CS001">
+      </div>
+
+      <div class="field">
+        <label for="email">Email address <span class="req">*</span></label>
+        <input type="email" id="email" name="email" required autocomplete="email"
+               value="{{ form.email or '' }}" placeholder="you@example.com">
+        <span class="hint">Franchise card and every signing confirmation go here.</span>
+      </div>
+
+      <div class="field">
+        <label for="contact">Mobile number <span class="req">*</span></label>
+        <input type="tel" id="contact" name="contact" required inputmode="numeric"
+               autocomplete="tel" value="{{ form.contact or '' }}" placeholder="10-digit number">
+      </div>
+
+      <div class="field">
+        <label for="designation">Designation <span class="req">*</span></label>
+        <input type="text" id="designation" name="designation" required
+               value="{{ form.designation or '' }}" placeholder="e.g. Student, Alumni, Faculty">
+      </div>
+
+      <div class="field">
+        <label for="manager_name">Team manager</label>
+        <input type="text" id="manager_name" name="manager_name"
+               value="{{ form.manager_name or '' }}" placeholder="Who stands in if you can't attend">
+      </div>
+
+      <div class="field">
+        <label for="manager_contact_number">Manager's mobile</label>
+        <input type="tel" id="manager_contact_number" name="manager_contact_number" inputmode="numeric"
+               value="{{ form.manager_contact_number or '' }}" placeholder="10-digit number">
+      </div>
+
+      <div class="field">
+        <label for="team_logo">Team logo</label>
+        <input type="file" id="team_logo" name="team_logo" accept="image/png,image/jpeg,image/gif,image/webp">
+        <span class="hint">Shown on the auction screen. Max 8 MB.</span>
+      </div>
+
+      <div class="field">
+        <label for="team_owner_photo">Owner's photo</label>
+        <input type="file" id="team_owner_photo" name="team_owner_photo" accept="image/png,image/jpeg,image/gif,image/webp">
+      </div>
+
+      <div class="field field--wide">
+        <label>Sports you're competing in <span class="req">*</span></label>
+        <div class="checkbox-grid">
+          {% for option in sport_options %}
+            <label class="check">
+              <input type="checkbox" name="sports" value="{{ option }}"
+                     {{ 'checked' if option in selected_sports }}>
+              <span>{{ option.replace('(', ' (') }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <label class="terms">
+        <input type="checkbox" name="terms_accepted" required>
+        <span>I confirm these details are accurate and accept the
+          <a href="{{ url_for('terms') }}" target="_blank" rel="noopener">terms and conditions</a>.</span>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary">Register franchise</button>
+      <a href="{{ url_for('index') }}" class="back-link">← Back to home</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

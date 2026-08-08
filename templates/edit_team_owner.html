@@ -1,0 +1,128 @@
+{% extends "admin_base.html" %}
+{% import "_icons.html" as ico %}
+{% block title %}Edit {{ owner.team_name }}{% endblock %}
+
+{% block body %}
+<div class="content" style="margin-left:0; max-width:900px; margin-right:auto;">
+  <div class="topbar">
+    <div>
+      <h1>Edit team owner</h1>
+      <p>{{ owner.reg_code }} · {{ owner.team_name }}</p>
+    </div>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn--ghost">{{ ico.icon('arrow-left', 16) }} Back to dashboard</a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ 'success' if category == 'success' else 'error' }}">
+            {{ ico.icon('check' if category == 'success' else 'alert', 18) }}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="card">
+    <div class="card__head">
+      <div class="card__title">Franchise details</div>
+      <span class="badge badge--gold">Remaining purse ₹{{ '{:,}'.format(owner.budget or 0) }}</span>
+    </div>
+
+    <div class="card__body">
+      <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="team_name">Team name</label>
+            <input type="text" id="team_name" name="team_name" value="{{ owner.team_name }}" required>
+          </div>
+
+          <div class="field">
+            <label for="name">Owner name</label>
+            <input type="text" id="name" name="name" value="{{ owner.name }}" required>
+          </div>
+
+          <div class="field">
+            <label for="usn">USN</label>
+            <input type="text" id="usn" name="usn" value="{{ owner.usn or '' }}" class="input-upper">
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ owner.email or '' }}">
+            <span class="hint">Signing confirmations are sent here.</span>
+          </div>
+
+          <div class="field">
+            <label for="contact">Contact</label>
+            <input type="tel" id="contact" name="contact" value="{{ owner.contact or '' }}">
+          </div>
+
+          <div class="field">
+            <label for="designation">Designation</label>
+            <input type="text" id="designation" name="designation" value="{{ owner.designation or '' }}">
+          </div>
+
+          <div class="field">
+            <label for="budget">Remaining budget (₹)</label>
+            <input type="number" id="budget" name="budget" value="{{ owner.budget or 0 }}" min="0" required>
+            <span class="hint">Editing this does not undo any completed signings.</span>
+          </div>
+
+          <div class="field">
+            <label for="manager_name">Team manager</label>
+            <input type="text" id="manager_name" name="manager_name" value="{{ owner.manager_name or '' }}">
+          </div>
+
+          <div class="field">
+            <label for="manager_contact_number">Manager contact</label>
+            <input type="tel" id="manager_contact_number" name="manager_contact_number"
+                   value="{{ owner.manager_contact_number or '' }}">
+          </div>
+
+          <div class="field field--wide">
+            <label>Sports</label>
+            <div class="checkbox-grid">
+              {% for option in sport_options %}
+                <label class="check">
+                  <input type="checkbox" name="sports" value="{{ option }}"
+                         {{ 'checked' if option.split('(')[0].strip()|lower in owned }}>
+                  <span>{{ option.replace('(', ' (') }}</span>
+                </label>
+              {% endfor %}
+            </div>
+            <span class="hint">Owners can only bid in the sports selected here.</span>
+          </div>
+
+          <div class="field">
+            <label for="team_logo">Replace team logo</label>
+            <input type="file" id="team_logo" name="team_logo" accept="image/png,image/jpeg,image/gif,image/webp">
+            {% if owner.team_logo %}
+              <img src="{{ url_for('static', filename=owner.team_logo) }}" alt="{{ owner.team_name }} logo"
+                   style="margin-top:0.7rem; max-height:150px; border-radius:12px; border:2px solid var(--gold);">
+            {% endif %}
+          </div>
+
+          <div class="field">
+            <label for="team_owner_photo">Replace owner photo</label>
+            <input type="file" id="team_owner_photo" name="team_owner_photo" accept="image/png,image/jpeg,image/gif,image/webp">
+            {% if owner.team_owner_photo %}
+              <img src="{{ url_for('static', filename=owner.team_owner_photo) }}" alt="{{ owner.name }}"
+                   style="margin-top:0.7rem; max-height:150px; border-radius:12px; border:2px solid var(--gold);">
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--gold">Save changes</button>
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn--ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

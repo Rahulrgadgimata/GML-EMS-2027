@@ -1,0 +1,286 @@
+{% extends "admin_base.html" %}
+{% import "_icons.html" as ico %}
+{% block title %}{{ sport }} auction{% endblock %}
+
+{% block head %}
+<style>
+  body {
+    background:
+      radial-gradient(1000px 460px at 12% -10%, #7a2a2a 0%, transparent 60%),
+      linear-gradient(160deg, #4a1717 0%, #2d0a0a 55%, #1c0606 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #f4ece7;
+  }
+
+  .auction { max-width: 1120px; margin: 0 auto; padding: 1.6rem clamp(1rem, 3vw, 2rem) 3rem; }
+
+  .auction__head { text-align: center; margin-bottom: 1.6rem; }
+  .auction__eyebrow {
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold-light); opacity: 0.85;
+  }
+  .auction__head h1 {
+    font-size: clamp(1.8rem, 5vw, 2.8rem); font-weight: 900; letter-spacing: -0.8px; color: #fff;
+  }
+  .auction__head h1 span { color: var(--gold-light); }
+
+  .switcher { display: flex; justify-content: center; gap: 0.5rem; margin: 1rem 0 1.6rem; flex-wrap: wrap; }
+  .switcher a {
+    padding: 0.5rem 1.3rem; border-radius: 100px; text-decoration: none;
+    font-size: 0.82rem; font-weight: 800; letter-spacing: 0.6px;
+    background: rgba(255, 255, 255, 0.09); color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(241, 196, 83, 0.28);
+  }
+  .switcher a.is-active { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #2d0a0a; }
+
+  .lot {
+    background: #fff; color: var(--ink);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.42);
+    display: none;
+  }
+  .lot.is-active { display: block; }
+
+  .lot__grid { display: grid; grid-template-columns: 300px 1fr; }
+  @media (max-width: 780px) { .lot__grid { grid-template-columns: 1fr; } }
+
+  .lot__photo {
+    background: linear-gradient(160deg, #4a1717, #2d0a0a);
+    display: grid; place-items: center; min-height: 330px; position: relative;
+  }
+  .lot__photo img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .lot__photo .placeholder { font-size: 4.5rem; opacity: 0.5; }
+
+  .lot__info { padding: 1.6rem 1.8rem; }
+  .lot__name { font-size: clamp(1.5rem, 3.6vw, 2.1rem); font-weight: 900; color: var(--maroon); line-height: 1.15; }
+  .lot__code { font-family: "Courier New", monospace; font-size: 0.82rem; color: var(--muted); }
+
+  .lot__facts {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.9rem; margin: 1.2rem 0;
+  }
+  .fact { background: #fffbf2; border: 1px solid #ebd9ae; border-radius: 12px; padding: 0.7rem 0.85rem; }
+  .fact__label {
+    font-size: 0.62rem; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold-dim);
+  }
+  .fact__value { font-weight: 700; font-size: 0.96rem; }
+
+  .lot__achievements {
+    background: #f7f4f2; border-left: 4px solid var(--maroon);
+    border-radius: 10px; padding: 0.85rem 1rem; font-size: 0.9rem; color: #5a4f4a;
+  }
+
+  .lot__bid { border-top: 1px solid var(--line); background: #fdfbf9; padding: 1.4rem 1.8rem; }
+
+  .counter {
+    display: flex; align-items: center; justify-content: center; gap: 1rem;
+    margin-top: 1.4rem; color: rgba(255, 255, 255, 0.86);
+  }
+  .counter button {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(241, 196, 83, 0.4);
+    background: rgba(255, 255, 255, 0.1); color: var(--gold-light);
+    font-size: 1.2rem; cursor: pointer; transition: background 0.2s;
+  }
+  .counter button:hover { background: rgba(241, 196, 83, 0.24); }
+  .counter__label { font-size: 0.86rem; font-weight: 700; letter-spacing: 1px; min-width: 130px; text-align: center; }
+
+  .empty-lot {
+    background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(241, 196, 83, 0.26);
+    border-radius: 20px; padding: 3rem 1.5rem; text-align: center; color: rgba(255, 255, 255, 0.85);
+  }
+
+  .sold-panel {
+    margin-top: 2rem; background: #fff; color: var(--ink);
+    border-radius: 18px; overflow: hidden; box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+  }
+
+  .auction .flash { color: inherit; }
+  .auction__foot { text-align: center; margin-top: 1.8rem; }
+  .auction__foot a { color: var(--gold-light); font-weight: 700; text-decoration: none; font-size: 0.9rem; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="auction">
+  <div class="auction__head">
+    <div class="auction__eyebrow">{{ brand.name }} · Live auction</div>
+    <h1>{{ sport }} <span>{{ 'Men' if gender == 'Male' else 'Women' }}</span></h1>
+  </div>
+
+  {% if not mens_only %}
+    <div class="switcher">
+      <a href="{{ url_for('bidding', sport=sport|lower, gender='male') }}" class="{{ 'is-active' if gender == 'Male' }}">Men</a>
+      <a href="{{ url_for('bidding', sport=sport|lower, gender='female') }}" class="{{ 'is-active' if gender == 'Female' }}">Women</a>
+    </div>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ 'success' if category == 'success' else ('info' if category == 'info' else 'error') }}">
+            {{ ico.icon('check' if category == 'success' else ('info' if category == 'info' else 'alert'), 19) }}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% if not owners %}
+    <div class="empty-lot">
+      <h2 style="font-size:1.3rem; font-weight:800; color:var(--gold-light);">No franchises registered for {{ sport }}</h2>
+      <p style="margin-top:0.6rem; opacity:0.85;">Register at least one team owner for this sport before opening the auction.</p>
+    </div>
+  {% elif players %}
+    {% for player in players %}
+      <article class="lot {{ 'is-active' if loop.first }}" data-lot>
+        <div class="lot__grid">
+          <div class="lot__photo">
+            {% if player.photo %}
+              <img src="{{ url_for('static', filename=player.photo) }}" alt="{{ player.name }}">
+            {% else %}
+              <div class="placeholder" aria-hidden="true">{{ ico.icon('medal', 60) }}</div>
+            {% endif %}
+          </div>
+
+          <div class="lot__info">
+            <div class="lot__code">{{ player.reg_code }} · Lot {{ loop.index }} of {{ players|length }}</div>
+            <h2 class="lot__name">{{ player.name }}</h2>
+
+            <div class="lot__facts">
+              <div class="fact"><div class="fact__label">Position</div><div class="fact__value">{{ player.position or '—' }}</div></div>
+              <div class="fact"><div class="fact__label">Experience</div><div class="fact__value">{{ player.experience or '—' }}</div></div>
+              <div class="fact"><div class="fact__label">Branch</div><div class="fact__value">{{ player.branch or '—' }}</div></div>
+              <div class="fact"><div class="fact__label">USN</div><div class="fact__value">{{ player.usn or '—' }}</div></div>
+              <div class="fact"><div class="fact__label">College</div><div class="fact__value">{{ player.college_name or '—' }}</div></div>
+              <div class="fact"><div class="fact__label">Category</div><div class="fact__value">{{ 'Women' if player.gender == 'Female' else 'Men' }}</div></div>
+            </div>
+
+            <div class="lot__achievements">
+              <strong>Achievements:</strong> {{ player.achievements or 'None listed.' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="lot__bid">
+          <form method="POST" action="{{ url_for('bidding', sport=sport|lower, gender=gender|lower) }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="player_id" value="{{ player.id }}">
+
+            <div class="form-grid">
+              <div class="field">
+                <label for="owner_{{ player.id }}">Winning franchise</label>
+                <select id="owner_{{ player.id }}" name="owner_id" required data-owner-select>
+                  {% for owner in owners %}
+                    <option value="{{ owner.id }}" data-budget="{{ owner.budget or 0 }}">
+                      {{ owner.team_name }} — ₹{{ '{:,}'.format(owner.budget or 0) }} left
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="bid_{{ player.id }}">Winning bid (₹)</label>
+                <input type="number" id="bid_{{ player.id }}" name="bid_amount" min="1" step="1000" required
+                       placeholder="Enter the hammer price" data-bid-input>
+                <span class="hint" data-budget-hint></span>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn--gold">{{ ico.icon('gavel', 17) }} Sell to this team</button>
+            </div>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+
+    <div class="counter">
+      <button type="button" data-prev aria-label="Previous player">{{ ico.icon('chevron-left', 20) }}</button>
+      <span class="counter__label"><span data-current>1</span> / {{ players|length }} unsold</span>
+      <button type="button" data-next aria-label="Next player">{{ ico.icon('chevron-right', 20) }}</button>
+    </div>
+  {% else %}
+    <div class="empty-lot">
+      <h2 style="font-size:1.3rem; font-weight:800; color:var(--gold-light);">Every player has been sold</h2>
+      <p style="margin-top:0.6rem; opacity:0.85;">
+        No unsold {{ 'women' if gender == 'Female' else 'men' }}'s {{ sport }} players remain in the pool.
+      </p>
+    </div>
+  {% endif %}
+
+  {% if sold_players %}
+    <div class="sold-panel">
+      <div class="card__head">
+        <div class="card__title">Already signed · {{ sport }} {{ 'Women' if gender == 'Female' else 'Men' }}</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Player</th><th>USN</th><th>Position</th><th>Team</th><th>Bid</th></tr></thead>
+          <tbody>
+            {% for player in sold_players %}
+              <tr>
+                <td class="cell-strong">{{ player.name }}</td>
+                <td class="cell-mono">{{ player.usn or '—' }}</td>
+                <td>{{ player.position or '—' }}</td>
+                <td>{{ player.sold_to }}</td>
+                <td class="cell-strong">₹{{ '{:,}'.format(player.bid_amount or 0) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="auction__foot">
+    <a class="icon-text" href="{{ url_for('admin_dashboard') }}">{{ ico.icon('arrow-left', 16) }} Back to admin dashboard</a>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const lots = [...document.querySelectorAll('[data-lot]')];
+    if (!lots.length) return;
+
+    let index = 0;
+    const label = document.querySelector('[data-current]');
+
+    function show(next) {
+      index = (next + lots.length) % lots.length;
+      lots.forEach((lot, i) => lot.classList.toggle('is-active', i === index));
+      if (label) label.textContent = index + 1;
+    }
+
+    document.querySelector('[data-prev]').addEventListener('click', () => show(index - 1));
+    document.querySelector('[data-next]').addEventListener('click', () => show(index + 1));
+
+    document.addEventListener('keydown', event => {
+      if (event.target.matches('input, select, textarea')) return;
+      if (event.key === 'ArrowLeft') show(index - 1);
+      if (event.key === 'ArrowRight') show(index + 1);
+    });
+
+    // Cap each bid at the selected franchise's remaining purse, live.
+    lots.forEach(lot => {
+      const select = lot.querySelector('[data-owner-select]');
+      const input = lot.querySelector('[data-bid-input]');
+      const hint = lot.querySelector('[data-budget-hint]');
+      if (!select || !input) return;
+
+      function sync() {
+        const budget = Number(select.selectedOptions[0].dataset.budget || 0);
+        input.max = budget;
+        hint.textContent = `Maximum ₹${budget.toLocaleString('en-IN')} for this team.`;
+        hint.style.color = Number(input.value) > budget ? 'var(--danger)' : '';
+      }
+
+      select.addEventListener('change', sync);
+      input.addEventListener('input', sync);
+      sync();
+    });
+  })();
+</script>
+{% endblock %}

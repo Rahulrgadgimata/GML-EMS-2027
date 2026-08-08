@@ -1,0 +1,44 @@
+{% extends "emails/_layout.html" %}
+{% import "emails/_macros.html" as ui %}
+
+{% block preheader %}Your {{ sport }} registration for {{ brand.name }} is confirmed — entry ID {{ reg_code }}.{% endblock %}
+{% block hero_badge %}Registration Confirmed{% endblock %}
+
+{% block content %}
+  {{ ui.headline("You're in, " ~ player.name.split()[0] ~ ".") }}
+
+  {{ ui.paragraph(
+      "Your name is officially on the " ~ sport ~ " sheet for " ~ brand.name ~ ". From here, every team owner in the league can see your profile — and when the auction opens, they'll be bidding on it."
+  ) }}
+
+  {{ ui.ticket(
+      "Player Entry Pass",
+      reg_code,
+      [
+        ("Name", player.name),
+        ("USN", player.usn),
+        ("Sport", sport),
+        ("Position", player.position or "—"),
+        ("Branch", player.branch),
+        ("College", player.college_name),
+        ("Category", category),
+        ("Experience", player.experience),
+        ("Email", player.email),
+        ("Contact", player.contact),
+      ]
+  ) }}
+
+  {{ ui.steps("What happens next", [
+      ("Your profile goes to the auction pool", "Owners review every registered player before bidding day."),
+      ("Auction day", "Teams bid live. The moment you're picked up, we email you your team, your owner and your bid value."),
+      ("Report to your team", "Your owner takes it from there — practice slots, jersey and match schedule."),
+  ]) }}
+
+  {{ ui.button(brand.site_url, "View the league") }}
+
+  {{ ui.note(
+      "Spotted a mistake in the details above? Reply-to is unmonitored — reach the organising committee on "
+      ~ brand.support_phones_text ~ " with your USN " ~ (player.usn or "") ~ " and we'll fix it before the auction."
+  ) }}
+
+{% endblock %}

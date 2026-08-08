@@ -1,0 +1,1143 @@
+/* ==========================================================================
+   GM League Season 4 — shared design system
+   Maroon + gold, championship-programme feel. Used by every public page.
+   ========================================================================== */
+
+:root {
+  --maroon: #4a1717;
+  --maroon-deep: #2d0a0a;
+  --maroon-soft: #6a2525;
+  --gold: #d4a017;
+  --gold-light: #f1c453;
+  --gold-dim: #a67c11;
+  --cream: #fffbf2;
+  --paper: #f2ebe8;
+  --white: #ffffff;
+  --ink: #2b2320;
+  --muted: #6f6560;
+  --line: #e8ded8;
+  --danger: #c0392b;
+  --success: #1e7a4d;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 2px 10px rgba(45, 10, 10, 0.07);
+  --shadow: 0 10px 30px rgba(45, 10, 10, 0.1);
+  --shadow-lg: 0 22px 50px rgba(45, 10, 10, 0.18);
+  --ease: 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+  --font: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Collegiate serif for the wordmark and headings. Georgia ships on every
+     platform, so the identity holds up with no webfont download. */
+  --font-display: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  flex: 1;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--maroon);
+}
+
+/* ------------------------------------------------------------------ header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: linear-gradient(135deg, var(--maroon) 0%, #5c1d1d 55%, var(--maroon-deep) 100%);
+  box-shadow: 0 2px 18px rgba(45, 10, 10, 0.28);
+  border-bottom: 3px solid var(--gold);
+}
+
+.site-header__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.85rem clamp(1rem, 4vw, 2rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Gold-ringed maroon disc with a line-art trophy — reads as a crest, not a blob. */
+.brand__crest {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--gold-light);
+  background: radial-gradient(circle at 34% 28%, #6d2626, #3a1010 72%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.16), 0 6px 16px rgba(0, 0, 0, 0.34),
+    inset 0 1px 3px rgba(255, 226, 160, 0.28);
+  transition: transform var(--ease), box-shadow var(--ease);
+}
+
+.brand:hover .brand__crest {
+  transform: rotate(-6deg) scale(1.05);
+  box-shadow: 0 0 0 4px rgba(212, 160, 23, 0.26), 0 8px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 3px rgba(255, 226, 160, 0.35);
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+}
+
+.brand__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.28rem, 3.4vw, 1.62rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.4px;
+  white-space: nowrap;
+}
+
+/* "GM" in gold, "League" in cream — a two-tone collegiate wordmark. */
+.brand__name-a {
+  background: linear-gradient(115deg, #ffe9b0, var(--gold-light) 45%, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand__name-b {
+  color: #fdf6ef;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.brand__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand__season {
+  padding: 0.1rem 0.5rem;
+  border-radius: 100px;
+  background: rgba(241, 196, 83, 0.16);
+  border: 1px solid rgba(241, 196, 83, 0.36);
+  color: var(--gold-light);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brand__uni {
+  font-size: 0.62rem;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .brand__uni {
+    display: none;
+  }
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.site-nav a {
+  color: rgba(255, 255, 255, 0.86);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.5rem 0.85rem;
+  border-radius: 100px;
+  transition: background var(--ease), color var(--ease);
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  background: rgba(241, 196, 83, 0.16);
+  color: var(--gold-light);
+}
+
+.site-nav a.is-cta {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--maroon-deep);
+  font-weight: 800;
+}
+
+.site-nav a.is-cta:hover {
+  transform: translateY(-1px);
+}
+
+/* -------------------------------------------------------------------- hero */
+.hero {
+  position: relative;
+  overflow: hidden;
+  color: #f6efe9;
+  background: radial-gradient(1200px 500px at 12% -10%, #7a2a2a 0%, transparent 60%),
+    linear-gradient(135deg, var(--maroon) 0%, var(--maroon-deep) 58%, #1c0606 100%);
+  padding: clamp(2.6rem, 8vw, 5rem) clamp(1rem, 4vw, 2rem);
+}
+
+.hero::after {
+  /* faint gold court lines */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(115deg, rgba(241, 196, 83, 0.05) 0 1px, transparent 1px 46px);
+  pointer-events: none;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(1.6rem, 4vw, 3rem);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .hero__inner {
+    grid-template-columns: 1.15fr 0.85fr;
+  }
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--maroon-deep);
+  padding: 0.42rem 1rem;
+  border-radius: 100px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  margin-bottom: 1.1rem;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 6.6vw, 3.7rem);
+  line-height: 1.04;
+  font-weight: 700;
+  letter-spacing: -1.4px;
+  margin-bottom: 1rem;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(120deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero__lead {
+  font-size: clamp(0.98rem, 2.2vw, 1.12rem);
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 54ch;
+  margin-bottom: 1.8rem;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.stat {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(241, 196, 83, 0.24);
+  border-radius: var(--radius);
+  padding: 1.1rem 1rem;
+  text-align: center;
+  backdrop-filter: blur(6px);
+}
+
+.stat__num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4.2vw, 2.3rem);
+  font-weight: 700;
+  color: var(--gold-light);
+  line-height: 1.1;
+}
+
+.stat__label {
+  font-size: 0.7rem;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* ----------------------------------------------------------------- buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.82rem 1.6rem;
+  border-radius: 100px;
+  transition: transform var(--ease), box-shadow var(--ease), background var(--ease), color var(--ease);
+}
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  color: var(--maroon-deep);
+  box-shadow: 0 8px 22px rgba(212, 160, 23, 0.34);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(212, 160, 23, 0.44);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+}
+
+.btn--ghost:hover,
+.btn--ghost:focus-visible {
+  background: #fff;
+  color: var(--maroon);
+  border-color: #fff;
+}
+
+.btn--dark {
+  background: var(--maroon);
+  color: var(--gold-light);
+}
+
+.btn--dark:hover {
+  background: var(--maroon-deep);
+  transform: translateY(-2px);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ------------------------------------------------------------------ layout */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(1.6rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem);
+}
+
+.container--narrow {
+  max-width: 780px;
+}
+
+.panel {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: clamp(1.4rem, 4vw, 2.6rem);
+  margin-bottom: clamp(1.2rem, 3vw, 2rem);
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 0.4rem;
+}
+
+.section-title h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.8vw, 2.2rem);
+  font-weight: 700;
+  color: var(--maroon);
+  letter-spacing: -0.6px;
+}
+
+.section-title p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-width: 60ch;
+  margin: 0.4rem auto 0;
+}
+
+.section-title::after {
+  content: "";
+  display: block;
+  width: 62px;
+  height: 4px;
+  margin: 0.9rem auto 1.8rem;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-light), var(--gold));
+}
+
+.eyebrow {
+  display: block;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 0.5rem;
+}
+
+/* ------------------------------------------------------------- sport cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(1rem, 2.4vw, 1.5rem);
+}
+
+.sport-card {
+  position: relative;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--ease), box-shadow var(--ease);
+  display: flex;
+  flex-direction: column;
+}
+
+.sport-card:hover,
+.sport-card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
+}
+
+.sport-card__media {
+  height: 150px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--maroon), var(--maroon-deep));
+  color: var(--gold-light);
+}
+
+.sport-card--soon .sport-card__media {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.sport-card__media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold-light), var(--gold));
+}
+
+.sport-card__body {
+  padding: 1.15rem 1.25rem 1.4rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.sport-card__title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--maroon);
+}
+
+.sport-card__desc {
+  font-size: 0.86rem;
+  color: var(--muted);
+  flex: 1;
+}
+
+.sport-card--soon {
+  opacity: 0.72;
+}
+
+.sport-card--soon .sport-card__media {
+  background: linear-gradient(135deg, #6b6b6b, #3d3d3d);
+  filter: grayscale(35%);
+}
+
+.pill-soon {
+  display: inline-block;
+  align-self: center;
+  padding: 0.5rem 1.1rem;
+  border-radius: 100px;
+  background: #f0ece9;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------- people row */
+.people-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(0.9rem, 2.4vw, 1.4rem);
+}
+
+.person {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem 1rem 1.3rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--ease), box-shadow var(--ease);
+}
+
+.person:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow);
+}
+
+.person__photo {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 0.9rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--gold);
+  box-shadow: 0 6px 18px rgba(212, 160, 23, 0.28);
+  background: var(--paper);
+}
+
+.person__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.person__name {
+  font-weight: 800;
+  color: var(--maroon);
+  font-size: 1.02rem;
+  line-height: 1.35;
+}
+
+.person__role {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-top: 0.25rem;
+}
+
+/* ------------------------------------------------------------------- forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.1rem 1.3rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field label,
+.form-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--maroon);
+}
+
+.field .hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.field .req {
+  color: var(--danger);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="number"],
+input[type="file"],
+select,
+textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.96rem;
+  color: var(--ink);
+  background: #fbf9f7;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.78rem 0.9rem;
+  transition: border-color var(--ease), box-shadow var(--ease), background var(--ease);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(212, 160, 23, 0.16);
+}
+
+input[type="file"] {
+  padding: 0.6rem;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-right: 0.8rem;
+  padding: 0.5rem 0.9rem;
+  border: 0;
+  border-radius: 100px;
+  background: var(--maroon);
+  color: var(--gold-light);
+  cursor: pointer;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* USN fields: uppercase what the user types, but leave the hint alone. */
+.input-upper {
+  text-transform: uppercase;
+}
+
+.input-upper::placeholder {
+  text-transform: none;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.6rem;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fbf9f7;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color var(--ease), background var(--ease);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.check:hover {
+  border-color: var(--gold);
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--maroon);
+  cursor: pointer;
+}
+
+.check:has(input:checked) {
+  border-color: var(--gold);
+  background: #fffaef;
+}
+
+.terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.terms input {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--maroon);
+}
+
+.terms a {
+  color: var(--maroon);
+  font-weight: 700;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 1.6rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+
+/* --------------------------------------------------------------- messaging */
+.flashes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.4rem;
+}
+
+.flash {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.9rem 1.15rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-left: 5px solid;
+  box-shadow: var(--shadow-sm);
+}
+
+.flash--success {
+  background: #eaf7f0;
+  color: #17563a;
+  border-color: var(--success);
+}
+
+.flash--error {
+  background: #fdecea;
+  color: #8e2119;
+  border-color: var(--danger);
+}
+
+.flash--info {
+  background: #fff8e8;
+  color: #6d5210;
+  border-color: var(--gold);
+}
+
+/* ------------------------------------------------------------------ ticket */
+.receipt {
+  background: var(--cream);
+  border: 1px solid #ebd9ae;
+  border-left: 6px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 1.6rem 1.7rem;
+}
+
+.receipt__code {
+  font-family: "Courier New", monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--maroon);
+  letter-spacing: 1px;
+}
+
+.receipt dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem 1.2rem;
+  margin-top: 1rem;
+  font-size: 0.94rem;
+}
+
+.receipt dt {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  padding-top: 0.2rem;
+}
+
+.receipt dd {
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ footer */
+.site-footer {
+  margin-top: auto;
+  background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-deep) 100%);
+  color: rgba(255, 255, 255, 0.78);
+  border-top: 3px solid var(--gold);
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 2rem) 1.6rem;
+}
+
+.site-footer__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.site-footer__logo {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3.2vw, 1.7rem);
+  font-weight: 700;
+  color: var(--gold-light);
+  letter-spacing: -0.3px;
+  margin-bottom: 0.4rem;
+}
+
+.site-footer__season {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  padding: 0.16rem 0.7rem;
+  border-radius: 100px;
+  background: rgba(241, 196, 83, 0.16);
+  border: 1px solid rgba(241, 196, 83, 0.36);
+  color: var(--gold-light);
+  font-family: var(--font);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.site-footer__tag {
+  font-size: 0.9rem;
+  opacity: 0.75;
+  margin-bottom: 1.3rem;
+}
+
+.site-footer__links {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  margin-bottom: 1.4rem;
+}
+
+.site-footer__links a {
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.3rem 0;
+  transition: color var(--ease);
+}
+
+.site-footer__links a:hover {
+  color: var(--gold-light);
+}
+
+.site-footer__bottom {
+  border-top: 1px solid rgba(241, 196, 83, 0.2);
+  padding-top: 1.1rem;
+  font-size: 0.78rem;
+  opacity: 0.65;
+}
+
+/* ------------------------------------------------------------------ misc */
+.center {
+  text-align: center;
+}
+
+.stack-sm > * + * {
+  margin-top: 0.6rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--maroon);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--gold-dim);
+}
+
+/* ============================================================== ICONOGRAPHY */
+.icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex: 0 0 auto;
+}
+
+.icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* ==================================================================== MOTION
+   Guarded behind `.has-js`, so no-JS and reduced-motion visitors get the fully
+   rendered page with none of this applied. */
+.has-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.has-js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.75s var(--ease) var(--reveal-delay, 0ms),
+    transform 0.75s var(--ease) var(--reveal-delay, 0ms);
+}
+
+/* Hero content animates on load rather than on scroll — it is already in view. */
+.has-js .hero__inner > * {
+  animation: rise-in 0.85s var(--ease) both;
+}
+
+.has-js .hero__inner > *:nth-child(2) {
+  animation-delay: 0.14s;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.has-js .flash--enter {
+  animation: slide-in 0.5s var(--ease) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Header tightens and deepens its shadow once the page scrolls. */
+.site-header.is-stuck {
+  box-shadow: 0 6px 26px rgba(45, 10, 10, 0.42);
+}
+
+.site-header.is-stuck .site-header__inner {
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.site-header__inner {
+  transition: padding var(--ease);
+}
+
+.site-header.is-stuck .brand__crest {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+}
+
+.brand__crest svg {
+  transition: width var(--ease), height var(--ease);
+}
+
+/* Cards lift with a gold edge on hover instead of only moving. */
+.sport-card,
+.person,
+.panel {
+  transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
+}
+
+.sport-card:hover,
+.person:hover {
+  border-color: rgba(212, 160, 23, 0.55);
+}
+
+.sport-card__media svg {
+  transition: transform var(--ease);
+}
+
+.sport-card:hover .sport-card__media svg {
+  transform: scale(1.12) rotate(-4deg);
+}
+
+.btn {
+  will-change: transform;
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+/* ------------------------------------------------- WhatsApp help button */
+.wa-fab {
+  position: fixed;
+  right: clamp(0.9rem, 3vw, 1.6rem);
+  bottom: clamp(0.9rem, 3vw, 1.6rem);
+  z-index: 300;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.1rem 0.75rem 0.9rem;
+  border-radius: 100px;
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.88rem;
+  line-height: 1.25;
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.42), 0 2px 8px rgba(0, 0, 0, 0.18);
+  transition: transform var(--ease), box-shadow var(--ease);
+}
+
+.wa-fab:hover,
+.wa-fab:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(37, 211, 102, 0.5), 0 2px 10px rgba(0, 0, 0, 0.2);
+  color: #fff;
+}
+
+.wa-fab__label strong {
+  display: block;
+  font-weight: 800;
+}
+
+/* On small screens it collapses to just the icon so it never covers content. */
+@media (max-width: 620px) {
+  .wa-fab {
+    padding: 0.85rem;
+    border-radius: 50%;
+  }
+
+  .wa-fab__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --------------------------------------------------- icon-specific tweaks */
+.success-crest {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  margin: 0 auto;
+  border-radius: 50%;
+  color: var(--gold);
+  background: radial-gradient(circle at 34% 28%, #fff6e2, #ffeec6 70%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 6px rgba(212, 160, 23, 0.12);
+}
+
+.has-js .success-crest {
+  animation: pop-in 0.7s var(--ease) both;
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.6); }
+  60% { transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.site-footer__links .icon-text {
+  gap: 0.4rem;
+}
+
+.wa-fab .icon {
+  vertical-align: middle;
+}

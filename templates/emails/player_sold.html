@@ -1,0 +1,38 @@
+{% extends "emails/_layout.html" %}
+{% import "emails/_macros.html" as ui %}
+
+{% block preheader %}{{ team_name }} just signed you for {{ amount_display }} at the {{ brand.short }} auction.{% endblock %}
+{% block hero_badge %}Sold &#127881;{% endblock %}
+
+{% block content %}
+  {{ ui.headline("SOLD — " ~ team_name ~ " picked you.") }}
+
+  {{ ui.paragraph(
+      player.name.split()[0] ~ ", the hammer just came down. " ~ team_name ~ " bid for you at the " ~ sport ~
+      " auction and won. You're now part of their squad for " ~ brand.name ~ "."
+  ) }}
+
+  {{ ui.amount_hero("Winning bid", amount_display, "Paid by " ~ team_name ~ (" — owner " ~ owner_name if owner_name else "")) }}
+
+  {{ ui.ticket(
+      "Squad Assignment",
+      player.usn,
+      [
+        ("Player", player.name),
+        ("Sport", sport),
+        ("Position", player.position or "—"),
+        ("Signed by", team_name),
+        ("Team owner", owner_name),
+        ("Bid value", amount_display),
+      ]
+  ) }}
+
+  {{ ui.steps("What to do now", [
+      ("Expect a call from your team", "Your owner and manager have your contact details and will reach out with practice timings."),
+      ("Keep your kit ready", "Turn up to the first session with your own shoes and water. Jerseys are handed out by the team."),
+      ("Play like you were bought for it", "Because you were."),
+  ]) }}
+
+  {{ ui.button(brand.site_url, "View the league") }}
+
+{% endblock %}

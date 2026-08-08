@@ -1,0 +1,25 @@
+{% extends "emails/_layout.html" %}
+{% import "emails/_macros.html" as ui %}
+
+{% block preheader %}SMTP is wired up correctly for {{ brand.name }}.{% endblock %}
+{% block hero_badge %}SMTP Test{% endblock %}
+
+{% block content %}
+  {{ ui.headline("Mail is working.") }}
+
+  {{ ui.paragraph(
+      "If you're reading this, the " ~ brand.short ~ " event management system can reach the outside world. "
+      "Player and owner confirmations will go out automatically from here on."
+  ) }}
+
+  {{ ui.ticket("Delivery Details", "SMTP OK", [
+      ("Sent at", sent_at),
+      ("Server", smtp_server),
+      ("Security", smtp_security),
+      ("Authenticated as", smtp_username),
+      ("From", smtp_sender),
+  ]) }}
+
+  {{ ui.note("This mail was triggered manually from the admin dashboard. Students never receive it.") }}
+
+{% endblock %}

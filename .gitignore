@@ -1,0 +1,24 @@
+# Secrets — never commit
+.env
+
+# Dry-run mail dumps
+outbox/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Flask / SQLite
+instance/
+*.db
+*.sqlite3
+
+# Editors & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
