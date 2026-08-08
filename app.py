@@ -19,7 +19,7 @@ from functools import wraps
 from io import BytesIO
 from urllib.parse import quote
 
-import pandas as pd
+# pandas is imported lazily inside excel_response() to keep cold-start fast on Vercel
 from dotenv import load_dotenv
 from flask import (
     Flask,
@@ -1069,6 +1069,7 @@ def owner_rows(owners):
 
 def excel_response(sheets, filename):
     """``sheets`` is a list of ``(sheet_name, list-of-dict-rows)``."""
+    import pandas as pd  # lazy import — keeps Vercel cold-start fast
     output = BytesIO()
     with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
         for sheet_name, rows in sheets:
